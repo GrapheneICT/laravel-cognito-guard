@@ -10,7 +10,6 @@ use Firebase\JWT\Key;
 use Firebase\JWT\SignatureInvalidException;
 use GrapheneICT\JwtGuard\Exceptions\InvalidTokenException;
 use InvalidArgumentException;
-use Ramsey\Uuid\Uuid;
 use UnexpectedValueException;
 
 class JwtService
@@ -18,9 +17,9 @@ class JwtService
     /**
      * Checks if the token is valid and decode it
      *
-     * @param string $token
-     *
+     * @param  string  $token
      * @return \stdClass
+     *
      * @throws InvalidTokenException
      */
     public function decode(string $token): \stdClass
@@ -35,13 +34,13 @@ class JwtService
 
             return JWT::decode($token, new Key($keys[$kid]->getKeyMaterial(), 'RS256'));
         } catch (
-        InvalidArgumentException
-        | UnexpectedValueException
-        | SignatureInvalidException
-        | BeforeValidException
-        | ExpiredException
-        | DomainException
-        $e
+            InvalidArgumentException
+            | UnexpectedValueException
+            | SignatureInvalidException
+            | BeforeValidException
+            | ExpiredException
+            | DomainException
+            $e
         ) {
             throw new InvalidTokenException($e->getMessage());
         }
@@ -50,9 +49,9 @@ class JwtService
     /**
      * Get Kid from the JWT token
      *
-     * @param string $token
-     *
+     * @param  string  $token
      * @return null
+     *
      * @throws InvalidTokenException
      */
     private function getKid(string $token)
@@ -88,23 +87,24 @@ class JwtService
      * Although we already know the token has a valid signature and is
      * unexpired, this method is used to validate the payload.
      * e
-     * @param object $payload
+     *
+     * @param  object  $payload
      * @param $issuer
      *
      * @throws InvalidTokenException
      */
     private function validatePayload(object $payload, $issuer)
     {
-        if($payload->iss !== $issuer){
-            throw new InvalidTokenException ('Invalid issuer. Expected:' . $issuer);
+        if ($payload->iss !== $issuer) {
+            throw new InvalidTokenException('Invalid issuer. Expected:'.$issuer);
         }
 
-        if(! in_array($payload->token_use, ['id','access'])){
-            throw new InvalidTokenException ('Invalid token_use. Must be one of ["id","access"].');
+        if (! in_array($payload->token_use, ['id', 'access'])) {
+            throw new InvalidTokenException('Invalid token_use. Must be one of ["id","access"].');
         }
 
-        if(! isset($payload->username) && !isset($payload->{'cognito:username'})){
-            throw new InvalidTokenException  ('Invalid token attributes. Token must include one of "username","cognito:username".');
+        if (! isset($payload->username) && ! isset($payload->{'cognito:username'})) {
+            throw new InvalidTokenException('Invalid token attributes. Token must include one of "username","cognito:username".');
         }
     }
 }
