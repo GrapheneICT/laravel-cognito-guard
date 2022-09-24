@@ -2,10 +2,10 @@
 
 namespace GrapheneICT\JwtGuard\Services;
 
+use Firebase\JWT\JWK;
 use Firebase\JWT\Key;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
-use Firebase\JWT\JWK;
 
 class JwkConverter
 {
@@ -16,8 +16,8 @@ class JwkConverter
      */
     public function getJwks(): array
     {
-        $jwks = Cache::rememberForever('cognito-auth.jwk', function (){
-            return Http::get($this->getIssuer() . '/.well-known/jwks.json')
+        $jwks = Cache::rememberForever('cognito-auth.jwk', function () {
+            return Http::get($this->getIssuer().'/.well-known/jwks.json')
                 ->throw()
                 ->json();
         });
