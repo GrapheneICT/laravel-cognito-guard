@@ -29,15 +29,14 @@ class CognitoService
      *
      * @param $cognitoId
      * @param $token
-     *
      * @return mixed
+     *
      * @throws ErrorException
      */
     public function getOrCreateUser($cognitoId, $token)
     {
         if ($this->isCognitoUserSync($cognitoId)) {
-            return config('cognito-auth.models.user.model')
-                ::where('provider_id', $cognitoId)
+            return config('cognito-auth.models.user.model')::where('provider_id', $cognitoId)
                 ->first();
         }
 
@@ -53,7 +52,7 @@ class CognitoService
             'name' => $attributes['username'],
             'email' => $attributes['email'],
             'provider' => $provider,
-            'provider_id' => $cognitoId
+            'provider_id' => $cognitoId,
         ]);
     }
 
@@ -65,10 +64,10 @@ class CognitoService
     public function getCognitoUserAttributes($token): array
     {
         try {
-            $attributes = $this->cognitoIdentity->getUser([ 'AccessToken' => $token ]);
+            $attributes = $this->cognitoIdentity->getUser(['AccessToken' => $token]);
             $results['username'] = $attributes->get('Username');
 
-            foreach($attributes->get('UserAttributes') as $attributes) {
+            foreach ($attributes->get('UserAttributes') as $attributes) {
                 $results[$attributes['Name']] = $attributes['Value'];
             }
 
@@ -82,13 +81,11 @@ class CognitoService
      * Checks if the cognito user is already in our database
      *
      * @param $cognitoId
-     *
      * @return bool
      */
     private function isCognitoUserSync($cognitoId): bool
     {
-        return config('cognito-auth.models.user.model')
-            ::where('provider_id', $cognitoId)
+        return config('cognito-auth.models.user.model')::where('provider_id', $cognitoId)
             ->exists();
     }
 }

@@ -20,8 +20,7 @@ class JwtGuard implements Guard
     protected $request;
 
     /**
-     * @param Request $request
-     *
+     * @param  Request  $request
      */
     public function __construct(Request $request)
     {
@@ -30,6 +29,7 @@ class JwtGuard implements Guard
 
     /**
      * @return JwtGuard|Authenticatable|\stdClass
+     *
      * @throws ErrorException
      * @throws InvalidTokenException
      */
@@ -46,7 +46,7 @@ class JwtGuard implements Guard
 
         $cognitoService = new CognitoService();
 
-        if (!config('cognito-auth.persist_user_data')) {
+        if (! config('cognito-auth.persist_user_data')) {
             return $decodedToken;
         }
 
@@ -54,13 +54,13 @@ class JwtGuard implements Guard
     }
 
     /**
-     * @param array $credentials
-     *
+     * @param  array  $credentials
      * @return void
+     *
      * @throws ErrorException
      */
     public function validate(array $credentials = [])
     {
-        throw new ErrorException("JwtGuard::validate() not implemented by design.");
+        throw new ErrorException('JwtGuard::validate() not implemented by design.');
     }
 }
