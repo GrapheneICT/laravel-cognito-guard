@@ -39,7 +39,7 @@
     },
     "autoload": {
         "psr-4": {
-            "GrapheneICT\\JwtGuard\\": "src"
+            "GrapheneICT\\CognitoGuard\\": "src"
         }
     },
     "scripts": {
@@ -54,11 +54,8 @@
     "extra": {
         "laravel": {
             "providers": [
-                "GrapheneICT\\GrapheneIct/laravelCognitoGuard\\GrapheneIct/laravelCognitoGuardServiceProvider"
-            ],
-            "aliases": {
-                "GrapheneIct/laravelCognitoGuard": "GrapheneICT\\GrapheneIct/laravelCognitoGuard\\Facades\\GrapheneIct/laravelCognitoGuard"
-            }
+                "GrapheneICT\\CognitoGuard\\CognitoAuthServiceProvider"
+            ]
         }
     },
     "minimum-stability": "dev",

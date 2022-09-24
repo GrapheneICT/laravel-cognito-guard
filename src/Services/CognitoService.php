@@ -1,6 +1,6 @@
 <?php
 
-namespace GrapheneICT\JwtGuard\Services;
+namespace GrapheneICT\CognitoGuard\Services;
 
 use Aws\CognitoIdentityProvider\CognitoIdentityProviderClient;
 use Aws\Exception\AwsException;

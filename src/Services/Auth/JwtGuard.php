@@ -1,6 +1,6 @@
 <?php
 
-namespace GrapheneICT\JwtGuard\Services\Auth;
+namespace GrapheneICT\CognitoGuard\Services\Auth;
 
 use ErrorException;
 use Illuminate\Auth\GuardHelpers;
