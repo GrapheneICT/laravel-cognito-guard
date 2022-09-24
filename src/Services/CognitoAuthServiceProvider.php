@@ -2,7 +2,7 @@
 
 namespace GrapheneICT\CognitoGuard\Services;
 
-use App\Services\Auth\JwtGuard;
+use GrapheneICT\CognitoGuard\Services\Auth\JwtGuard;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 
