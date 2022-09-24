@@ -1,24 +1,30 @@
 {
-    "name": ":vendor_slug/:package_slug",
-    "description": ":package_description",
+    "name": "grapheneict/laravel-cognito-guard",
+    "description": "Laravel authentication guard to validate JSON Web Tokens (JWT) issued by an AWS Cognito User Pool",
     "keywords": [
-        ":vendor_name",
+        "GrapheneICT",
         "laravel",
-        ":package_slug"
+        "laravel-cognito-guard"
     ],
-    "homepage": "https://github.com/:vendor_slug/:package_slug",
+    "homepage": "https://github.com/GrapheneICT/laravel-cognito-guard",
     "license": "MIT",
     "authors": [
         {
-            "name": ":author_name",
-            "email": "author@domain.com",
+            "name": "Jovan Stojiljkovic",
+            "email": "jstojiljkovic941@gmail.com",
             "role": "Developer"
         }
     ],
     "require": {
-        "php": "^8.1",
+        "php": "^7.3|^8.0",
         "spatie/laravel-package-tools": "^1.13.0",
-        "illuminate/contracts": "^9.0"
+        "illuminate/contracts": "^9.0",
+        "aws/aws-sdk-php": "^3.235",
+        "firebase/php-jwt": "^6.3",
+        "fruitcake/laravel-cors": "^2.0",
+        "guzzlehttp/guzzle": "^7.0.1",
+        "lcobucci/jwt": "^4.2",
+        "phpseclib/phpseclib": "^3.0"
     },
     "require-dev": {
         "laravel/pint": "^1.0",
@@ -35,13 +41,7 @@
     },
     "autoload": {
         "psr-4": {
-            "VendorName\\Skeleton\\": "src",
-            "VendorName\\Skeleton\\Database\\Factories\\": "database/factories"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "VendorName\\Skeleton\\Tests\\": "tests"
+            "GrapheneICT\\JwtGuard\\": "src"
         }
     },
     "scripts": {
@@ -56,10 +56,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "VendorName\\Skeleton\\SkeletonServiceProvider"
+                "GrapheneICT\\GrapheneIct/laravelCognitoGuard\\GrapheneIct/laravelCognitoGuardServiceProvider"
             ],
             "aliases": {
-                "Skeleton": "VendorName\\Skeleton\\Facades\\Skeleton"
+                "GrapheneIct/laravelCognitoGuard": "GrapheneICT\\GrapheneIct/laravelCognitoGuard\\Facades\\GrapheneIct/laravelCognitoGuard"
             }
         }
     },
