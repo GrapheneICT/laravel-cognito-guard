@@ -17,8 +17,6 @@
     ],
     "require": {
         "php": "^7.3|^8.0",
-        "spatie/laravel-package-tools": "^1.13.0",
-        "illuminate/contracts": "^9.0",
         "aws/aws-sdk-php": "^3.235",
         "firebase/php-jwt": "^6.3",
         "fruitcake/laravel-cors": "^2.0",
@@ -41,7 +39,7 @@
     },
     "autoload": {
         "psr-4": {
-            "GrapheneICT\\JwtGuard\\": "src"
+            "GrapheneICT\\CognitoGuard\\": "src"
         }
     },
     "scripts": {
@@ -56,11 +54,8 @@
     "extra": {
         "laravel": {
             "providers": [
-                "GrapheneICT\\GrapheneIct/laravelCognitoGuard\\GrapheneIct/laravelCognitoGuardServiceProvider"
-            ],
-            "aliases": {
-                "GrapheneIct/laravelCognitoGuard": "GrapheneICT\\GrapheneIct/laravelCognitoGuard\\Facades\\GrapheneIct/laravelCognitoGuard"
-            }
+                "GrapheneICT\\CognitoGuard\\Services\\CognitoAuthServiceProvider"
+            ]
         }
     },
     "minimum-stability": "dev",

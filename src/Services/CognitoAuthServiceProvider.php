@@ -1,6 +1,6 @@
 <?php
 
-namespace GrapheneICT\JwtGuard\Services;
+namespace GrapheneICT\CognitoGuard\Services;
 
 use App\Services\Auth\JwtGuard;
 use Illuminate\Foundation\Application;

@@ -1,6 +1,6 @@
 <?php
 
-namespace GrapheneICT\JwtGuard\Exceptions;
+namespace GrapheneICT\CognitoGuard\Exceptions;
 
 use Illuminate\Auth\AuthenticationException;
 
