@@ -17,7 +17,7 @@ class CognitoAuthServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__ . '/../config/cognito-auth.php' => config_path('cognito-auth.php'),
+                __DIR__.'/../config/cognito-auth.php' => config_path('cognito-auth.php'),
             ], 'config');
         }
     }
