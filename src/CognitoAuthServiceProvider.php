@@ -1,8 +1,10 @@
 <?php
 
-namespace GrapheneICT\CognitoGuard\Services;
+namespace GrapheneICT\CognitoGuard;
 
 use GrapheneICT\CognitoGuard\Services\Auth\JwtGuard;
+use GrapheneICT\CognitoGuard\Services\JwkConverter;
+use GrapheneICT\CognitoGuard\Services\JwtService;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 

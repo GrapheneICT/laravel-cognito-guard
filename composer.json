@@ -52,7 +52,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "GrapheneICT\\CognitoGuard\\Services\\CognitoAuthServiceProvider"
+                "GrapheneICT\\CognitoGuard\\CognitoAuthServiceProvider"
             ]
         }
     },
