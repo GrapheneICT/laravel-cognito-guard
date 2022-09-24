@@ -1,8 +1,10 @@
 <?php
 
-namespace GrapheneICT\CognitoGuard\Services;
+namespace GrapheneICT\CognitoGuard;
 
 use GrapheneICT\CognitoGuard\Services\Auth\JwtGuard;
+use GrapheneICT\CognitoGuard\Services\JwkConverter;
+use GrapheneICT\CognitoGuard\Services\JwtService;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 
@@ -15,7 +17,7 @@ class CognitoAuthServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__.'/../config/cognito-auth.php' => config_path('cognito-auth.php'),
+                __DIR__ . '/../config/cognito-auth.php' => config_path('cognito-auth.php'),
             ], 'config');
         }
     }
