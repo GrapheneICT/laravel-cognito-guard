@@ -3,6 +3,8 @@
 namespace GrapheneICT\CognitoGuard\Services\Auth;
 
 use ErrorException;
+use GrapheneICT\CognitoGuard\Services\CognitoService;
+use GrapheneICT\CognitoGuard\Services\JwtService;
 use Illuminate\Auth\GuardHelpers;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Guard;

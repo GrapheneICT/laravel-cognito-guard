@@ -8,7 +8,7 @@ use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Firebase\JWT\SignatureInvalidException;
-use GrapheneICT\JwtGuard\Exceptions\InvalidTokenException;
+use GrapheneICT\CognitoGuard\Exceptions\InvalidTokenException;
 use InvalidArgumentException;
 use UnexpectedValueException;
 
