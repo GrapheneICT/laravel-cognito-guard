@@ -18,7 +18,6 @@
     "require": {
         "php": "^7.3|^8.0",
         "spatie/laravel-package-tools": "^1.13.0",
-        "illuminate/contracts": "^9.0",
         "aws/aws-sdk-php": "^3.235",
         "firebase/php-jwt": "^6.3",
         "fruitcake/laravel-cors": "^2.0",
