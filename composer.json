@@ -1,5 +1,5 @@
 {
-    "name": "grapheneict/laravel-cognito-guard",
+    "name": "graphene-ict/laravel-cognito-guard",
     "description": "Laravel authentication guard to validate JSON Web Tokens (JWT) issued by an AWS Cognito User Pool",
     "keywords": [
         "GrapheneICT",
@@ -29,9 +29,6 @@
         "nunomaduro/collision": "^6.0",
         "nunomaduro/larastan": "^2.0.1",
         "orchestra/testbench": "^7.0",
-        "pestphp/pest": "^1.21",
-        "pestphp/pest-plugin-laravel": "^1.1",
-        "phpstan/extension-installer": "^1.1",
         "phpstan/phpstan-deprecation-rules": "^1.0",
         "phpstan/phpstan-phpunit": "^1.0",
         "phpunit/phpunit": "^9.5",
@@ -40,6 +37,11 @@
     "autoload": {
         "psr-4": {
             "GrapheneICT\\CognitoGuard\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "GrapheneICT\\CognitoGuard\\Tests\\": "tests"
         }
     },
     "scripts": {
@@ -54,7 +56,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "GrapheneICT\\CognitoGuard\\Services\\CognitoAuthServiceProvider"
+                "GrapheneICT\\CognitoGuard\\CognitoAuthServiceProvider"
             ]
         }
     },
