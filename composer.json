@@ -1,5 +1,5 @@
 {
-    "name": "grapheneict/laravel-cognito-guard",
+    "name": "graphene-ict/laravel-cognito-guard",
     "description": "Laravel authentication guard to validate JSON Web Tokens (JWT) issued by an AWS Cognito User Pool",
     "keywords": [
         "GrapheneICT",
