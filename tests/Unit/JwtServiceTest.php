@@ -1,4 +1,5 @@
 <?php
+
 namespace GrapheneICT\CognitoGuard\Tests\Unit;
 
 use Firebase\JWT\JWK;
@@ -13,6 +14,7 @@ class JwtServiceTest extends TestCase
 {
     /**
      * @test
+     *
      * @throws InvalidTokenException
      * @throws BindingResolutionException
      */
@@ -27,7 +29,6 @@ class JwtServiceTest extends TestCase
             $mock->shouldReceive('getIssuer')
                 ->andReturn($issuer);
         });
-
 
         $jwtService = new JwtService();
 
@@ -56,7 +57,7 @@ class JwtServiceTest extends TestCase
     {
         $ts = $this->app->make(JwtService::class);
 
-        $this->expectException(InvalidTokenException ::class);
+        $this->expectException(InvalidTokenException::class);
         $this->expectExceptionMessage('Token has a wrong number of segments');
         $ts->getKid('INVALID_TOKEN');
     }
@@ -68,7 +69,7 @@ class JwtServiceTest extends TestCase
     {
         $ts = $this->app->make(JwtService::class);
 
-        $this->expectException(InvalidTokenException ::class);
+        $this->expectException(InvalidTokenException::class);
         $this->expectExceptionMessage('Syntax error, malformed JSON');
         $ts->getKid('IN.VALID.TOKEN');
     }
@@ -80,9 +81,9 @@ class JwtServiceTest extends TestCase
     {
         $ts = $this->app->make(JwtService::class);
 
-        $this->expectException(InvalidTokenException ::class);
+        $this->expectException(InvalidTokenException::class);
         $this->expectExceptionMessage('Malformed UTF-8 characters');
-        $ts->getKid(json_encode([ 'kid' => '123' ]) . '.seg2.seg3');
+        $ts->getKid(json_encode(['kid' => '123']).'.seg2.seg3');
     }
 
     /**
@@ -92,9 +93,9 @@ class JwtServiceTest extends TestCase
     {
         $ts = $this->app->make(JwtService::class);
 
-        $this->expectException(InvalidTokenException ::class);
+        $this->expectException(InvalidTokenException::class);
         $this->expectExceptionMessage('No alg present in token header');
-        $ts->getKid(base64_encode(json_encode([ 'kid' => '123' ])) . '.seg2.seg3');
+        $ts->getKid(base64_encode(json_encode(['kid' => '123'])).'.seg2.seg3');
     }
 
     /**
@@ -104,9 +105,9 @@ class JwtServiceTest extends TestCase
     {
         $ts = $this->app->make(JwtService::class);
 
-        $this->expectException(InvalidTokenException ::class);
+        $this->expectException(InvalidTokenException::class);
         $this->expectExceptionMessage('The token alg is not RS256');
-        $ts->getKid(base64_encode(json_encode([ 'kid' => '123', 'alg' => 'other' ])) . '.seg2.seg3');
+        $ts->getKid(base64_encode(json_encode(['kid' => '123', 'alg' => 'other'])).'.seg2.seg3');
     }
 
     /**
@@ -118,7 +119,7 @@ class JwtServiceTest extends TestCase
         $jwtNoKid = JWT::encode($jtb->payload, $jtb->keypair, 'RS256');
         $ts = $this->app->make(JwtService::class);
 
-        $this->expectException(InvalidTokenException ::class);
+        $this->expectException(InvalidTokenException::class);
         $this->expectExceptionMessage('No kid present in token header');
         $ts->getKid($jwtNoKid);
     }
@@ -133,9 +134,9 @@ class JwtServiceTest extends TestCase
 
         $ts = $this->app->make(JwtService::class);
 
-        $this->expectException(InvalidTokenException ::class);
+        $this->expectException(InvalidTokenException::class);
         $this->expectExceptionMessage('Invalid issuer');
-        $ts->validatePayload((object)$jtb->payload, $this->getIssuer());
+        $ts->validatePayload((object) $jtb->payload, $this->getIssuer());
     }
 
     /**
@@ -149,9 +150,9 @@ class JwtServiceTest extends TestCase
 
         $ts = $this->app->make(JwtService::class);
 
-        $this->expectException(InvalidTokenException ::class);
+        $this->expectException(InvalidTokenException::class);
         $this->expectExceptionMessage('Invalid token_use');
-        $ts->validatePayload((object)$jtb->payload, $this->getIssuer());
+        $ts->validatePayload((object) $jtb->payload, $this->getIssuer());
     }
 
     /**
@@ -164,8 +165,8 @@ class JwtServiceTest extends TestCase
 
         $ts = $this->app->make(JwtService::class);
 
-        $this->expectException(InvalidTokenException ::class);
+        $this->expectException(InvalidTokenException::class);
         $this->expectExceptionMessage('Invalid token attributes. Token must include one of "username","cognito:username"');
-        $ts->validatePayload((object)$jtb->payload, $this->getIssuer());
+        $ts->validatePayload((object) $jtb->payload, $this->getIssuer());
     }
 }

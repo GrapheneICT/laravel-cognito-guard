@@ -11,20 +11,16 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Orchestra\Testbench\TestCase as Orchestra;
 use phpseclib3\Crypt\RSA;
 use Ramsey\Uuid\Uuid;
-use Illuminate\Support\Facades\Route;
 
 abstract class TestCase extends Orchestra
 {
     use DatabaseTransactions;
 
-    /**
-     *
-     */
     public function setUp(): void
     {
         parent::setUp();
 
-        $this->loadMigrationsFrom(realpath(__DIR__ . '/Fixtures'));
+        $this->loadMigrationsFrom(realpath(__DIR__.'/Fixtures'));
         $this->artisan('migrate');
 
         \Route::get('user', function () {
@@ -33,20 +29,18 @@ abstract class TestCase extends Orchestra
     }
 
     /**
-     * @param Application $app
-     *
+     * @param  Application  $app
      * @return string[]
      */
     protected function getPackageProviders($app): array
     {
-        return [ CognitoAuthServiceProvider::class ];
+        return [CognitoAuthServiceProvider::class];
     }
 
     /**
      * Define environment setup.
      *
-     * @param Application $app
-     *
+     * @param  Application  $app
      * @return void
      */
     protected function getEnvironmentSetUp($app)
@@ -61,6 +55,7 @@ abstract class TestCase extends Orchestra
      * format, a jwt signed with the pem, and the kid of the jwt.
      *
      * @return object
+     *
      * @throws
      */
     protected function getJwtTestBundle(): object
@@ -72,7 +67,7 @@ abstract class TestCase extends Orchestra
 
         $payload = [
             'sub' => $sub,
-            'device_key' => 'us-west-2_' . Uuid::uuid4(),
+            'device_key' => 'us-west-2_'.Uuid::uuid4(),
             'event_id' => Uuid::uuid4(),
             'token_use' => 'access',
             'scope' => 'aws.cognito.signin.user.admin',
@@ -87,25 +82,25 @@ abstract class TestCase extends Orchestra
 
         $keypair = RSA::createKey(512);
 
-        $kid = ( base64_encode(hash('sha256', $keypair->getPublicKey(), true)) );
+        $kid = (base64_encode(hash('sha256', $keypair->getPublicKey(), true)));
         $jwt = JWT::encode($payload, $keypair, 'RS256', $kid);
         $keyInfo = openssl_pkey_get_details(openssl_pkey_get_public($keypair->getPublicKey()));
         $jwk = [
             'kty' => 'RSA',
             'kid' => $kid,
-            'n' => rtrim(str_replace([ '+', '/' ], [ '-', '_' ], base64_encode($keyInfo['rsa']['n'])), '='),
-            'e' => rtrim(str_replace([ '+', '/' ], [ '-', '_' ], base64_encode($keyInfo['rsa']['e'])), '='),
+            'n' => rtrim(str_replace(['+', '/'], ['-', '_'], base64_encode($keyInfo['rsa']['n'])), '='),
+            'e' => rtrim(str_replace(['+', '/'], ['-', '_'], base64_encode($keyInfo['rsa']['e'])), '='),
         ];
-        $jwks = [ 'keys' => [ $jwk ] ];
+        $jwks = ['keys' => [$jwk]];
 
-        return (object)[
+        return (object) [
             'payload' => $payload,
             'keypair' => $keypair,
             'jwt' => $jwt,
             'kid' => $kid,
             'jwks' => $jwks,
             'sub' => $sub,
-            'alg' => 'RS256'
+            'alg' => 'RS256',
         ];
     }
 

@@ -32,10 +32,10 @@ class JwtGuardTest extends TestCase
         });
 
         $this->getJson('/test', [
-            'Authorization' => 'Bearer' . ' ' . $jtb->jwt,
+            'Authorization' => 'Bearer'.' '.$jtb->jwt,
         ])->assertSuccessful()
             ->assertJsonFragment([
-                'sub' => $jtb->sub
+                'sub' => $jtb->sub,
             ]);
     }
 
@@ -46,7 +46,7 @@ class JwtGuardTest extends TestCase
     {
         $guard = $this->app->make(JwtGuard::class);
 
-        $this->expectException(ErrorException ::class);
+        $this->expectException(ErrorException::class);
         $this->expectExceptionMessage('JwtGuard::validate() not implemented by design.');
         $guard->validate();
     }
