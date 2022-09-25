@@ -43,6 +43,10 @@ class JwtGuard implements Guard
 
         $token = $this->request->bearerToken();
 
+        if (! $token) {
+            abort(403, 'Token is missing');
+        }
+
         $jwtService = new JwtService();
         $decodedToken = $jwtService->decode($token);
 
