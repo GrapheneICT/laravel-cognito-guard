@@ -1,9 +1,9 @@
 # Laravel Cognito Guard
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/grapheneict/graphene-ict-laravel-cognito-guard.svg?style=flat-square)](https://packagist.org/packages/grapheneict/graphene-ict-laravel-cognito-guard)
-[![GitHub Tests Action Status](https://img.shields.io/github/workflow/status/grapheneict/graphene-ict-laravel-cognito-guard/run-tests?label=tests)](https://github.com/grapheneict/graphene-ict-laravel-cognito-guard/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/workflow/status/grapheneict/graphene-ict-laravel-cognito-guard/Fix%20PHP%20code%20style%20issues?label=code%20style)](https://github.com/grapheneict/graphene-ict-laravel-cognito-guard/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
-[![Total Downloads](https://img.shields.io/packagist/dt/grapheneict/graphene-ict-laravel-cognito-guard.svg?style=flat-square)](https://packagist.org/packages/grapheneict/graphene-ict-laravel-cognito-guard)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/grapheneict/graphene-ict-laravel-cognito-guard.svg?style=flat-square)](https://packagist.org/packages/graphene-ict/laravel-cognito-guard)
+[![GitHub Tests Action Status](https://img.shields.io/github/workflow/status/grapheneict/graphene-ict-laravel-cognito-guard/run-tests?label=tests)](https://packagist.org/packages/graphene-ict/laravel-cognito-guard/actions?query=workflow%3Arun-tests+branch%3Amain)
+[![GitHub Code Style Action Status](https://img.shields.io/github/workflow/status/grapheneict/graphene-ict-laravel-cognito-guard/Fix%20PHP%20code%20style%20issues?label=code%20style)](https://packagist.org/packages/graphene-ict/laravel-cognito-guard/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
+[![Total Downloads](https://img.shields.io/packagist/dt/grapheneict/graphene-ict-laravel-cognito-guard.svg?style=flat-square)](https://packagist.org/packages/graphene-ict/laravel-cognito-guard)
 
 Laravel authentication guard to validate JSON Web Tokens (JWT) issued by an AWS Cognito User Pool
 
