@@ -25,7 +25,7 @@ class JwtService
     public function decode(string $token): \stdClass
     {
         $kid = $this->getKid($token);
-        $jwtConverter = new JwkConverter();
+        $jwtConverter = app()->make(JwkConverter::class);
         $keys = $jwtConverter->getJwks();
 
         try {
