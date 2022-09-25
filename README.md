@@ -51,9 +51,8 @@ return [
 ];
 ```
 
-Since `persist_user_data` is `true` by default user will be automatically saved with the following attributes name, email, provider and provider_id so
-adding them in the list of fillables is a must. If you wish to extend with more attributes modify the data before it is saved or use the events and
-use class `CognitoService` to retrieve them from the Cognito by providing a request token.
+Since `persist_user_data` is `true` by default user will be automatically saved with the following attributes: `name, email, provider and provider_id` so
+adding them in the list of fillables is a must. If you wish to extend with more attributes using the class `CognitoService` modify the data before it is saved or use the events.
 
 ```php
    $cognitoService = new CognitoService();
