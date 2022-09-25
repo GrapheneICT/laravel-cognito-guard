@@ -3,8 +3,8 @@
 namespace GrapheneICT\CognitoGuard\Tests;
 
 use App\Models\User;
-use App\Services\CognitoAuthServiceProvider;
 use Firebase\JWT\JWT;
+use GrapheneICT\CognitoGuard\CognitoAuthServiceProvider;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Routing\Middleware\SubstituteBindings;
