@@ -3,6 +3,7 @@
 namespace GrapheneICT\CognitoGuard\Services\Auth;
 
 use ErrorException;
+use GrapheneICT\CognitoGuard\Exceptions\InvalidTokenException;
 use GrapheneICT\CognitoGuard\Services\CognitoService;
 use GrapheneICT\CognitoGuard\Services\JwtService;
 use Illuminate\Auth\GuardHelpers;
@@ -44,7 +45,7 @@ class JwtGuard implements Guard
         $token = $this->request->bearerToken();
 
         if (! $token) {
-            abort(403, 'Token is missing');
+            throw new InvalidTokenException('Token is missing');
         }
 
         $jwtService = new JwtService();
