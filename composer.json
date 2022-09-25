@@ -40,6 +40,11 @@
             "GrapheneICT\\CognitoGuard\\": "src"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "GrapheneICT\\CognitoGuard\\Tests\\": "tests"
+        }
+    },
     "scripts": {
         "analyse": "vendor/bin/phpstan analyse",
         "test": "vendor/bin/pest",
