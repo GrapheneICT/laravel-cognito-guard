@@ -1,23 +1,14 @@
 # Laravel Cognito Guard
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/graphene-ict/laravel-cognito-guard.svg?style=flat-square)](https://packagist.org/packages/graphene-ict/laravel-cognito-guard)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/GrapheneICT/laravel-cognito-guard/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/GrapheneICT/laravel-cognito-guard/actions/workflows/run-tests.yml)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/GrapheneICT/laravel-cognito-guard/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/GrapheneICT/laravel-cognito-guard/actions/workflows/fix-php-code-style-issues.yml)
-[![PHPStan](https://img.shields.io/github/actions/workflow/status/GrapheneICT/laravel-cognito-guard/phpstan.yml?branch=main&label=phpstan&style=flat-square)](https://github.com/GrapheneICT/laravel-cognito-guard/actions/workflows/phpstan.yml)
-[![Total Downloads](https://img.shields.io/packagist/dt/graphene-ict/laravel-cognito-guard.svg?style=flat-square)](https://packagist.org/packages/graphene-ict/laravel-cognito-guard)
+[![CI](https://github.com/GrapheneICT/laravel-cognito-guard/actions/workflows/run-tests.yml/badge.svg)](https://github.com/GrapheneICT/laravel-cognito-guard/actions/workflows/run-tests.yml)
+[![codecov](https://codecov.io/gh/GrapheneICT/laravel-cognito-guard/graph/badge.svg)](https://codecov.io/gh/GrapheneICT/laravel-cognito-guard)
+[![Packagist Version](https://img.shields.io/packagist/v/graphene-ict/laravel-cognito-guard.svg)](https://packagist.org/packages/graphene-ict/laravel-cognito-guard)
+[![Packagist Downloads](https://img.shields.io/packagist/dt/graphene-ict/laravel-cognito-guard.svg)](https://packagist.org/packages/graphene-ict/laravel-cognito-guard)
+[![PHP Version](https://img.shields.io/badge/php-%3E%3D8.3-8892BF.svg)](https://php.net)
+[![Laravel Version](https://img.shields.io/badge/laravel-%3E%3D11-FF2D20.svg)](https://laravel.com)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md)
 
 A lean Laravel auth guard that validates JSON Web Tokens issued by an **AWS Cognito User Pool**. Verifies the JWT signature against Cognito's JWKS, enforces standard Cognito claims, and resolves the authenticated user via a `UserProvider` — or returns a value object in DB-less mode.
-
-## Why this package
-
-| | This package | `ellaisys/aws-cognito` | `devadamlar/laravel-oidc` |
-|---|---|---|---|
-| **Focus** | Just verify the JWT | Full Cognito SDK wrapper (signup, MFA, hosted UI…) | Generic OIDC, any issuer |
-| **Footprint** | `firebase/php-jwt` + Illuminate | AWS SDK, dynamodb, fido2, etc. | Generic OIDC stack |
-| **Cognito-specific claim checks** | yes (`token_use`, `client_id`, scopes) | yes | partial |
-| **`cognito:groups` → Gates bridge** | yes | no | n/a |
-| **Multi-pool** | yes | yes | yes |
-| **DB-less mode (no users table)** | yes | no | yes |
 
 ## Requirements
 
@@ -214,12 +205,6 @@ Register a second guard with a different `pool` key and pick which one to apply 
 ],
 ```
 Then `Route::middleware('auth:partners')->...`.
-</details>
-
-<details>
-<summary><strong>I'm migrating from <code>benbjurstrom/cognito-jwt-guard</code></strong></summary>
-
-See [docs/MIGRATING-FROM-BENBJURSTROM.md](docs/MIGRATING-FROM-BENBJURSTROM.md).
 </details>
 
 ## Testing
