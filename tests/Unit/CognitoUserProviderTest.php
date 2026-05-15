@@ -40,11 +40,11 @@ it('returns null from resolveFromClaims when auto_provision is false and the use
 
 it('throws when the configured model class does not exist', function () {
     makeProvider(['model' => 'NotAClass'])->retrieveById('any-sub');
-})->throws(\RuntimeException::class, 'not configured to a valid class');
+})->throws(RuntimeException::class, 'not configured to a valid class');
 
 it('throws when the configured model does not extend Eloquent\\Model', function () {
-    makeProvider(['model' => \stdClass::class])->retrieveById('any-sub');
-})->throws(\RuntimeException::class, 'must extend');
+    makeProvider(['model' => stdClass::class])->retrieveById('any-sub');
+})->throws(RuntimeException::class, 'must extend');
 
 it('treats no-op auth methods as inert', function () {
     $provider = makeProvider();
