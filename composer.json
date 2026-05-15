@@ -1,10 +1,15 @@
 {
     "name": "graphene-ict/laravel-cognito-guard",
-    "description": "Laravel authentication guard to validate JSON Web Tokens (JWT) issued by an AWS Cognito User Pool",
+    "description": "Lean Laravel auth guard that validates AWS Cognito User Pool JWTs. Supports DB-backed users, DB-less mode, cognito:groups → Gates bridge, multi-pool, and Octane.",
     "keywords": [
         "GrapheneICT",
         "laravel",
-        "laravel-cognito-guard"
+        "laravel-cognito-guard",
+        "aws-cognito",
+        "jwt",
+        "oidc",
+        "authentication",
+        "guard"
     ],
     "homepage": "https://github.com/GrapheneICT/laravel-cognito-guard",
     "license": "MIT",
@@ -16,26 +21,21 @@
         }
     ],
     "require": {
-        "php": "^7.3|^8.0",
-        "aws/aws-sdk-php": "^3.235",
-        "firebase/php-jwt": "^6.3",
-        "fruitcake/laravel-cors": "^2.0",
-        "guzzlehttp/guzzle": "^7.0.1",
-        "lcobucci/jwt": "^4.2",
-        "phpseclib/phpseclib": "^3.0"
+        "php": "^8.3",
+        "ext-openssl": "*",
+        "firebase/php-jwt": "^6.10|^7.0",
+        "illuminate/auth": "^11.0|^12.0|^13.0",
+        "illuminate/contracts": "^11.0|^12.0|^13.0",
+        "illuminate/http": "^11.0|^12.0|^13.0",
+        "illuminate/support": "^11.0|^12.0|^13.0"
     },
     "require-dev": {
-        "laravel/pint": "^1.0",
-        "nunomaduro/collision": "^6.0",
-        "nunomaduro/larastan": "^2.0.1",
-        "orchestra/testbench": "^7.0",
-        "pestphp/pest": "^1.21",
-        "pestphp/pest-plugin-laravel": "^1.1",
-        "phpstan/extension-installer": "^1.1",
-        "phpstan/phpstan-deprecation-rules": "^1.0",
-        "phpstan/phpstan-phpunit": "^1.0",
-        "phpunit/phpunit": "^9.5",
-        "spatie/laravel-ray": "^1.26"
+        "larastan/larastan": "^3.0",
+        "laravel/pint": "^1.18",
+        "orchestra/testbench": "^9.0|^10.0",
+        "pestphp/pest": "^3.0",
+        "pestphp/pest-plugin-laravel": "^3.0",
+        "phpseclib/phpseclib": "^3.0"
     },
     "autoload": {
         "psr-4": {
@@ -51,11 +51,15 @@
         "analyse": "vendor/bin/phpstan analyse",
         "test": "vendor/bin/pest",
         "test-coverage": "vendor/bin/pest --coverage",
-        "format": "vendor/bin/pint"
+        "format": "vendor/bin/pint",
+        "format-check": "vendor/bin/pint --test"
     },
     "config": {
         "sort-packages": true,
-        "allow-plugins": true
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "phpstan/extension-installer": true
+        }
     },
     "extra": {
         "laravel": {
@@ -64,6 +68,6 @@
             ]
         }
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true
 }

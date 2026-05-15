@@ -1,100 +1,169 @@
 # Laravel Cognito Guard
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/grapheneict/graphene-ict-laravel-cognito-guard.svg?style=flat-square)](https://packagist.org/packages/graphene-ict/laravel-cognito-guard)
-[![GitHub Tests Action Status](https://img.shields.io/github/workflow/status/grapheneict/graphene-ict-laravel-cognito-guard/run-tests?label=tests)](https://github.com/GrapheneICT/laravel-cognito-guard/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/workflow/status/grapheneict/graphene-ict-laravel-cognito-guard/Fix%20PHP%20code%20style%20issues?label=code%20style)](https://github.com/GrapheneICT/laravel-cognito-guard/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
-[![Total Downloads](https://img.shields.io/packagist/dt/grapheneict/graphene-ict-laravel-cognito-guard.svg?style=flat-square)](https://packagist.org/packages/graphene-ict/laravel-cognito-guard)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/graphene-ict/laravel-cognito-guard.svg?style=flat-square)](https://packagist.org/packages/graphene-ict/laravel-cognito-guard)
+[![Total Downloads](https://img.shields.io/packagist/dt/graphene-ict/laravel-cognito-guard.svg?style=flat-square)](https://packagist.org/packages/graphene-ict/laravel-cognito-guard)
+[![License](https://img.shields.io/packagist/l/graphene-ict/laravel-cognito-guard.svg?style=flat-square)](LICENSE.md)
 
-Laravel authentication guard to validate JSON Web Tokens (JWT) issued by an AWS Cognito User Pool
+A lean Laravel auth guard that validates JSON Web Tokens issued by an **AWS Cognito User Pool**. Verifies the JWT signature against Cognito's JWKS, enforces standard Cognito claims, and resolves the authenticated user via a `UserProvider` — or returns a value object in DB-less mode.
+
+## Why this package
+
+| | This package | `ellaisys/aws-cognito` | `devadamlar/laravel-oidc` |
+|---|---|---|---|
+| **Focus** | Just verify the JWT | Full Cognito SDK wrapper (signup, MFA, hosted UI…) | Generic OIDC, any issuer |
+| **Footprint** | `firebase/php-jwt` + Illuminate | AWS SDK, dynamodb, fido2, etc. | Generic OIDC stack |
+| **Cognito-specific claim checks** | yes (`token_use`, `client_id`, scopes) | yes | partial |
+| **`cognito:groups` → Gates bridge** | yes | no | n/a |
+| **Multi-pool** | yes | yes | yes |
+| **DB-less mode (no users table)** | yes | no | yes |
+
+## Requirements
+
+- PHP 8.3+
+- Laravel 11 / 12 / 13
+- A configured AWS Cognito User Pool
 
 ## Installation
 
-You can install the package via composer:
-
 ```bash
 composer require graphene-ict/laravel-cognito-guard
+php artisan vendor:publish --tag=cognito-guard-config
 ```
 
-You can publish the config file with:
+Set the env vars:
+
+```dotenv
+COGNITO_USER_POOL_ID=us-east-1_XXXXXXXXX
+AWS_REGION=us-east-1
+# Optional comma-separated allow-list:
+COGNITO_CLIENT_IDS=app-client-1,app-client-2
+```
+
+## Quick start
+
+### DB-backed users (default)
+
+1. Add `provider_id` to your `users` table:
+
+   ```php
+   $table->string('provider_id')->unique()->nullable();
+   ```
+
+2. Add `provider_id` to the model's `$fillable`.
+
+3. Register the guard in `config/auth.php`:
+
+   ```php
+   'guards' => [
+       'cognito' => [
+           'driver' => 'cognito',
+           'provider' => 'cognito',
+           'pool' => 'default',
+       ],
+   ],
+
+   'providers' => [
+       'cognito' => ['driver' => 'cognito'],
+   ],
+   ```
+
+4. Protect routes:
+
+   ```php
+   Route::middleware('auth:cognito')->get('/me', fn () => auth()->user());
+   ```
+
+A new `User` record is auto-provisioned on the first authenticated request whose `sub` is not yet known. Disable by setting `cognito-guard.user_provider.auto_provision` to `false`.
+
+### DB-less mode
+
+For SPA / service-to-service callers that don't need a local users table:
+
+```php
+'guards' => [
+    'cognito' => [
+        'driver' => 'cognito',
+        'provider' => 'cognito',
+        'pool' => 'default',
+        'db_less' => true,
+    ],
+],
+```
+
+`auth()->user()` returns a `GrapheneICT\CognitoGuard\CognitoUser` value object:
+
+```php
+$user = auth()->user();
+$user->username();        // string|null
+$user->email();           // string|null
+$user->groups();          // string[]
+$user->scopes();          // string[]
+$user->claim('sub');      // any single claim
+$user->claims();          // raw payload (stdClass)
+```
+
+### Groups → Gates bridge
+
+With `cognito-guard.bridge_groups_to_gates` enabled (default), entries in the `cognito:groups` claim become Gate abilities for free:
+
+```php
+Gate::allows('admins');                       // true if 'admins' is in cognito:groups
+Route::middleware('can:moderators')->...;     // works the same
+```
+
+### Multi-pool
+
+```php
+// config/cognito-guard.php
+'pools' => [
+    'default'  => ['user_pool_id' => env('COGNITO_USER_POOL_ID'),  'region' => 'us-east-1'],
+    'partners' => ['user_pool_id' => env('PARTNER_POOL_ID'),       'region' => 'us-east-1'],
+],
+
+// config/auth.php
+'guards' => [
+    'cognito'  => ['driver' => 'cognito', 'provider' => 'cognito', 'pool' => 'default'],
+    'partners' => ['driver' => 'cognito', 'provider' => 'cognito', 'pool' => 'partners'],
+],
+```
+
+## Configuration reference
+
+See [`config/cognito-guard.php`](config/cognito-guard.php). Key knobs:
+
+- `pools.<name>.allowed_token_use` — `['access']`, `['id']`, or both.
+- `pools.<name>.allowed_client_ids` — empty = accept any; populated = strict allow-list against `client_id` (access) / `aud` (id).
+- `pools.<name>.required_scopes` — every scope must be present in the token's `scope` claim.
+- `pools.<name>.leeway` — clock-skew tolerance for `exp`/`nbf`/`iat`, in seconds.
+- `jwks.cache_ttl` — JWKS cache TTL (default 6h). Stale entries kept 30d and used on Cognito outages.
+- `bridge_groups_to_gates` — toggle the `cognito:groups` → Gate bridge.
+
+## Diagnostics
 
 ```bash
-php artisan vendor:publish --provider="GrapheneICT\CognitoGuard\Services\CognitoAuthServiceProvider" --tag="config"
+php artisan about           # shows Cognito Guard section
 ```
 
-This is the contents of the published config file:
+## Upgrading from v1
 
-```php
-return [
-    /*
-     * If persist_user_data is true the cognito guard will automatically create a new user
-     * record anytime the user contained in a validated JWT
-     * does not already exist in the users table.
-     *
-     * The new user will be created with the user attributes name, email, provider and provider_id so
-     * it is required for you to add them at the list of fillable attributes in the model array, if you
-     * wish to add more attributes from the cognito modify before it is saved or use the events.
-     *
-     */
-    'persist_user_data' => true,
+Breaking changes — see [UPGRADING.md](UPGRADING.md).
 
-    'models' => [
-        /*
-         * When using this package, we need to know which
-         * Eloquent model should be used for your user. Of course, it
-         * is often just the "User" model but you may use whatever you like.
-         *
-         */
-        'user' => [
-            'model' => App\Models\User::class,
-        ],
-    ],
-];
-```
+## Testing the package
 
-Since `persist_user_data` is `true` by default user will be automatically saved with the following attributes: `name, email, provider and provider_id` so
-adding them in the list of fillables is a must. If you wish to extend with more attributes using the class `CognitoService` modify the data before it is saved or use the events.
-
-```php
-   $cognitoService = new CognitoService();
-   $attributes = $cognitoService->getCognitoUserAttributes($token);
-```
-
-## Usage
-
-In  config`auth` create additional guard with the coginto driver
-
-```php
-   'api' => [
-            'driver' => 'cognito',
-            'provider' => 'users',
-        ],
-```
-
-After that just apply it to the Authentication Defaults as option for authentication shown bellow
-
-```php
-    'defaults' => [
-        'guard' => 'api',
-        'passwords' => 'users',
-    ],
+```bash
+composer install
+composer test
+composer analyse
 ```
 
 ## Changelog
 
-Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
+[CHANGELOG.md](CHANGELOG.md).
 
-## Contributing
+## Security
 
-Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
-
-## Security Vulnerabilities
-
-Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
-
-## Credits
-
-- [Jovan Stojiljkovic](https://github.com/GrapheneICT)
+Report vulnerabilities via [our security policy](../../security/policy).
 
 ## License
 
-The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
+MIT — see [LICENSE.md](LICENSE.md).
