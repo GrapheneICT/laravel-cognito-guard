@@ -4,10 +4,15 @@ namespace GrapheneICT\CognitoGuard\Auth;
 
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\UserProvider;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use stdClass;
 
 class CognitoUserProvider implements UserProvider
 {
+    /**
+     * @param  array<string, mixed>  $config
+     */
     public function __construct(private readonly array $config) {}
 
     public function retrieveById($identifier): ?Authenticatable
@@ -16,9 +21,9 @@ class CognitoUserProvider implements UserProvider
             return null;
         }
 
-        $model = $this->newModelQuery();
+        $user = $this->newModelQuery()->where($this->subColumn(), (string) $identifier)->first();
 
-        return $model->where($this->subColumn(), (string) $identifier)->first();
+        return $user instanceof Authenticatable ? $user : null;
     }
 
     public function resolveFromClaims(stdClass $claims): ?Authenticatable
@@ -55,22 +60,34 @@ class CognitoUserProvider implements UserProvider
         // Token-based auth: no remember token.
     }
 
+    /**
+     * @param  array<string, mixed>  $credentials
+     */
     public function retrieveByCredentials(array $credentials): ?Authenticatable
     {
         return null;
     }
 
+    /**
+     * @param  array<string, mixed>  $credentials
+     */
     public function validateCredentials(Authenticatable $user, array $credentials): bool
     {
         return false;
     }
 
+    /**
+     * @param  array<string, mixed>  $credentials
+     */
     public function rehashPasswordIfRequired(Authenticatable $user, array $credentials, bool $force = false): void
     {
         // Token-based auth: no password to rehash.
     }
 
-    private function newModelQuery()
+    /**
+     * @return Builder<Model>
+     */
+    private function newModelQuery(): Builder
     {
         $modelClass = $this->modelClass();
 

@@ -1,7 +1,5 @@
 <?php
 
-use App\Models\User;
-
 return [
 
     'default_pool' => env('COGNITO_DEFAULT_POOL', 'default'),
@@ -29,7 +27,7 @@ return [
 
     'user_provider' => [
         'auto_provision' => (bool) env('COGNITO_AUTO_PROVISION', true),
-        'model' => env('COGNITO_USER_MODEL', User::class),
+        'model' => env('COGNITO_USER_MODEL', 'App\\Models\\User'),
         'sub_column' => 'provider_id',
         'attribute_map' => [
             'email' => 'email',

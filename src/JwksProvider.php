@@ -5,6 +5,7 @@ namespace GrapheneICT\CognitoGuard;
 use Firebase\JWT\JWK;
 use Firebase\JWT\Key;
 use GrapheneICT\CognitoGuard\Exceptions\JwksFetchException;
+use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Throwable;
@@ -13,6 +14,9 @@ class JwksProvider
 {
     private const STALE_TTL_SECONDS = 2592000;
 
+    /**
+     * @param  array<string, mixed>  $jwksConfig
+     */
     public function __construct(
         private readonly string $poolId,
         private readonly string $region,
@@ -60,6 +64,9 @@ class JwksProvider
         return JWK::parseKeySet($jwks);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function fetch(): array
     {
         return Http::timeout((int) ($this->jwksConfig['http_timeout'] ?? 5))
@@ -68,7 +75,7 @@ class JwksProvider
             ->json();
     }
 
-    private function cache()
+    private function cache(): Repository
     {
         $store = $this->jwksConfig['cache_store'] ?? null;
 

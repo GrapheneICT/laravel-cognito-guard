@@ -18,6 +18,9 @@ class JwtVerifier
 {
     private const ALGORITHM = 'RS256';
 
+    /**
+     * @param  array<string, mixed>  $poolConfig
+     */
     public function __construct(
         private readonly JwksProvider $jwks,
         private readonly array $poolConfig,
@@ -46,7 +49,7 @@ class JwtVerifier
             |ExpiredException
             |DomainException $e
         ) {
-            throw new InvalidTokenException($e->getMessage(), previous: $e);
+            throw new InvalidTokenException($e->getMessage());
         }
 
         $this->validatePayload($payload);
@@ -65,9 +68,9 @@ class JwtVerifier
         try {
             $header = JWT::jsonDecode(JWT::urlsafeB64Decode($segments[0]));
         } catch (DomainException $e) {
-            throw new InvalidTokenException($e->getMessage(), previous: $e);
+            throw new InvalidTokenException($e->getMessage());
         } catch (Throwable $e) {
-            throw new InvalidTokenException('Malformed token header: '.$e->getMessage(), previous: $e);
+            throw new InvalidTokenException('Malformed token header: '.$e->getMessage());
         }
 
         if (! is_object($header)) {

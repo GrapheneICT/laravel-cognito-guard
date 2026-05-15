@@ -57,6 +57,9 @@ class CognitoGuard implements Guard
         return $this->user = $resolved;
     }
 
+    /**
+     * @param  array<string, mixed>  $credentials
+     */
     public function validate(array $credentials = []): bool
     {
         return false;
