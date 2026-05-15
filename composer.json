@@ -20,6 +20,11 @@
             "role": "Developer"
         }
     ],
+    "support": {
+        "issues": "https://github.com/GrapheneICT/laravel-cognito-guard/issues",
+        "source": "https://github.com/GrapheneICT/laravel-cognito-guard",
+        "security": "https://github.com/GrapheneICT/laravel-cognito-guard/security/policy"
+    },
     "require": {
         "php": "^8.3",
         "ext-openssl": "*",
@@ -62,6 +67,9 @@
         }
     },
     "extra": {
+        "branch-alias": {
+            "dev-main": "2.x-dev"
+        },
         "laravel": {
             "providers": [
                 "GrapheneICT\\CognitoGuard\\CognitoAuthServiceProvider"

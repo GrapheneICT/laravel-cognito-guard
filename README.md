@@ -1,8 +1,10 @@
 # Laravel Cognito Guard
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/graphene-ict/laravel-cognito-guard.svg?style=flat-square)](https://packagist.org/packages/graphene-ict/laravel-cognito-guard)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/GrapheneICT/laravel-cognito-guard/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/GrapheneICT/laravel-cognito-guard/actions/workflows/run-tests.yml)
+[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/GrapheneICT/laravel-cognito-guard/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/GrapheneICT/laravel-cognito-guard/actions/workflows/fix-php-code-style-issues.yml)
+[![PHPStan](https://img.shields.io/github/actions/workflow/status/GrapheneICT/laravel-cognito-guard/phpstan.yml?branch=main&label=phpstan&style=flat-square)](https://github.com/GrapheneICT/laravel-cognito-guard/actions/workflows/phpstan.yml)
 [![Total Downloads](https://img.shields.io/packagist/dt/graphene-ict/laravel-cognito-guard.svg?style=flat-square)](https://packagist.org/packages/graphene-ict/laravel-cognito-guard)
-[![License](https://img.shields.io/packagist/l/graphene-ict/laravel-cognito-guard.svg?style=flat-square)](LICENSE.md)
 
 A lean Laravel auth guard that validates JSON Web Tokens issued by an **AWS Cognito User Pool**. Verifies the JWT signature against Cognito's JWKS, enforces standard Cognito claims, and resolves the authenticated user via a `UserProvider` — or returns a value object in DB-less mode.
 
@@ -20,13 +22,20 @@ A lean Laravel auth guard that validates JSON Web Tokens issued by an **AWS Cogn
 ## Requirements
 
 - PHP 8.3+
-- Laravel 11 / 12 / 13
+- Laravel 11 / 12
 - A configured AWS Cognito User Pool
 
 ## Installation
 
+You can install the package via Composer:
+
 ```bash
 composer require graphene-ict/laravel-cognito-guard
+```
+
+Publish the config file:
+
+```bash
 php artisan vendor:publish --tag=cognito-guard-config
 ```
 
@@ -39,7 +48,7 @@ AWS_REGION=us-east-1
 COGNITO_CLIENT_IDS=app-client-1,app-client-2
 ```
 
-## Quick start
+## Usage
 
 ### DB-backed users (default)
 
@@ -144,11 +153,7 @@ See [`config/cognito-guard.php`](config/cognito-guard.php). Key knobs:
 php artisan about           # shows Cognito Guard section
 ```
 
-## Upgrading from v1
-
-Breaking changes — see [UPGRADING.md](UPGRADING.md).
-
-## Testing the package
+## Testing
 
 ```bash
 composer install
@@ -156,14 +161,27 @@ composer test
 composer analyse
 ```
 
+## Upgrading from v1
+
+Breaking changes — see [UPGRADING.md](UPGRADING.md).
+
 ## Changelog
 
-[CHANGELOG.md](CHANGELOG.md).
+Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
 
-## Security
+## Contributing
 
-Report vulnerabilities via [our security policy](../../security/policy).
+Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
+
+## Security Vulnerabilities
+
+Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
+
+## Credits
+
+- [Jovan Stojiljkovic](https://github.com/GrapheneICT)
+- [All Contributors](../../contributors)
 
 ## License
 
-MIT — see [LICENSE.md](LICENSE.md).
+The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
