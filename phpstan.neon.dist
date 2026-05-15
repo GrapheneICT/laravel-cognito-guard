@@ -1,14 +1,18 @@
 includes:
+    - vendor/larastan/larastan/extension.neon
     - phpstan-baseline.neon
 
 parameters:
-    level: 4
+    level: 6
     paths:
         - src
         - config
-        - database
     tmpDir: build/phpstan
     checkOctaneCompatibility: true
     checkModelProperties: true
-    checkMissingIterableValueType: false
-
+    ignoreErrors:
+        # env() calls in a package's config file are the standard Laravel pattern;
+        # the file gets republished into the host app's own config/ at install time.
+        -
+            identifier: larastan.noEnvCallsOutsideOfConfig
+            path: config/*

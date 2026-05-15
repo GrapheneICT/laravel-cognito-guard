@@ -2,113 +2,170 @@
 
 namespace GrapheneICT\CognitoGuard\Tests;
 
-use App\Models\User;
 use Firebase\JWT\JWT;
 use GrapheneICT\CognitoGuard\CognitoAuthServiceProvider;
-use Illuminate\Foundation\Application;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Routing\Middleware\SubstituteBindings;
+use GrapheneICT\CognitoGuard\Tests\Fixtures\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Orchestra\Testbench\TestCase as Orchestra;
 use phpseclib3\Crypt\RSA;
-use Ramsey\Uuid\Uuid;
 
 abstract class TestCase extends Orchestra
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
-    public function setUp(): void
+    public string $poolId = 'us-east-1_TestPool';
+
+    public string $region = 'us-east-1';
+
+    protected function setUp(): void
     {
         parent::setUp();
 
-        $this->loadMigrationsFrom(realpath(__DIR__.'/Fixtures'));
-        $this->artisan('migrate');
-
-        \Route::get('user', function () {
-            return auth()->user();
-        })->middleware(SubstituteBindings::class)->middleware('api');
+        $this->loadMigrationsFrom(__DIR__.'/Fixtures/database/migrations');
     }
 
-    /**
-     * @param  Application  $app
-     * @return string[]
-     */
     protected function getPackageProviders($app): array
     {
         return [CognitoAuthServiceProvider::class];
     }
 
-    /**
-     * Define environment setup.
-     *
-     * @param  Application  $app
-     * @return void
-     */
-    protected function getEnvironmentSetUp($app)
+    protected function getEnvironmentSetUp($app): void
     {
-        $app['config']->set('auth.defaults.guard', 'api');
-        $app['config']->set('auth.guards.api.driver', 'cognito');
-        $app['config']->set('auth.providers.users.model', User::class);
+        $app['config']->set('database.default', 'testing');
+        $app['config']->set('database.connections.testing', [
+            'driver' => 'sqlite',
+            'database' => ':memory:',
+            'prefix' => '',
+        ]);
+
+        $app['config']->set('auth.defaults.guard', 'cognito');
+        $app['config']->set('auth.guards.cognito', [
+            'driver' => 'cognito',
+            'provider' => 'cognito',
+            'pool' => 'default',
+        ]);
+        $app['config']->set('auth.providers.cognito', [
+            'driver' => 'cognito',
+        ]);
+
+        $app['config']->set('cognito-guard.default_pool', 'default');
+        $app['config']->set('cognito-guard.pools.default', [
+            'user_pool_id' => $this->poolId,
+            'region' => $this->region,
+            'allowed_token_use' => ['access', 'id'],
+            'allowed_client_ids' => [],
+            'required_scopes' => [],
+            'leeway' => 0,
+        ]);
+        $app['config']->set('cognito-guard.jwks', [
+            'cache_store' => 'array',
+            'cache_ttl' => 21600,
+            'cache_key_prefix' => 'cognito-guard:jwks',
+            'stale_on_error' => true,
+            'http_timeout' => 5,
+        ]);
+        $app['config']->set('cognito-guard.user_provider', [
+            'auto_provision' => true,
+            'model' => User::class,
+            'sub_column' => 'provider_id',
+            'attribute_map' => [
+                'email' => 'email',
+                'cognito:username' => 'name',
+            ],
+        ]);
+        $app['config']->set('cognito-guard.bridge_groups_to_gates', true);
+    }
+
+    protected function getIssuer(): string
+    {
+        return sprintf('https://cognito-idp.%s.amazonaws.com/%s', $this->region, $this->poolId);
     }
 
     /**
-     * Provides an array containing a jwks with a single jwk, the jwk in pem
-     * format, a jwt signed with the pem, and the kid of the jwt.
+     * Build a signed JWT plus its matching JWKS using openssl.
      *
-     * @return object
-     *
-     * @throws
+     * @param  array<string, mixed>  $payloadOverrides
+     * @return object{payload: array, jwt: string, jwks: array, kid: string, sub: string}
      */
-    protected function getJwtTestBundle(): object
+    protected function makeToken(array $payloadOverrides = []): object
     {
-        $sub = Uuid::uuid4()->toString();
+        ['privatePem' => $privatePem, 'jwk' => $jwk, 'kid' => $kid] = $this->generateKey();
+
+        $sub = (string) ($payloadOverrides['sub'] ?? $this->uuid());
         $now = time();
 
-        $issuer = $this->getIssuer();
-
-        $payload = [
+        $payload = array_merge([
             'sub' => $sub,
-            'device_key' => 'us-west-2_'.Uuid::uuid4(),
-            'event_id' => Uuid::uuid4(),
             'token_use' => 'access',
-            'scope' => 'aws.cognito.signin.user.admin',
-            'auth_time' => $now,
-            'iss' => $issuer,
+            'iss' => $this->getIssuer(),
             'exp' => $now + 3600,
             'iat' => $now,
-            'jti' => Uuid::uuid4()->toString(),
-            'client_id' => bin2hex(random_bytes(13)),
+            'auth_time' => $now,
+            'jti' => $this->uuid(),
+            'client_id' => 'test-client',
             'username' => $sub,
-        ];
+            'scope' => 'aws.cognito.signin.user.admin',
+        ], $payloadOverrides);
 
-        $keypair = RSA::createKey(512);
+        // Allow `null` overrides to remove a default claim entirely.
+        $payload = array_filter($payload, fn ($v) => $v !== null);
 
-        $kid = (base64_encode(hash('sha256', $keypair->getPublicKey(), true)));
-        $jwt = JWT::encode($payload, $keypair, 'RS256', $kid);
-        $keyInfo = openssl_pkey_get_details(openssl_pkey_get_public($keypair->getPublicKey()));
-        $jwk = [
-            'kty' => 'RSA',
-            'kid' => $kid,
-            'n' => rtrim(str_replace(['+', '/'], ['-', '_'], base64_encode($keyInfo['rsa']['n'])), '='),
-            'e' => rtrim(str_replace(['+', '/'], ['-', '_'], base64_encode($keyInfo['rsa']['e'])), '='),
-        ];
-        $jwks = ['keys' => [$jwk]];
+        $jwt = JWT::encode($payload, $privatePem, 'RS256', $kid);
 
         return (object) [
             'payload' => $payload,
-            'keypair' => $keypair,
             'jwt' => $jwt,
+            'jwks' => ['keys' => [$jwk]],
             'kid' => $kid,
-            'jwks' => $jwks,
             'sub' => $sub,
-            'alg' => 'RS256',
         ];
     }
 
     /**
-     * @return string
+     * @return array{privatePem: string, jwk: array, kid: string}
      */
-    protected function getIssuer(): string
+    private function generateKey(): array
     {
-        return sprintf('https://cognito-idp.%s.amazonaws.com/%s', env('AWS_COGNITO_REGION'), env('AWS_COGNITO_USER_POOL_ID'));
+        $private = RSA::createKey(2048);
+
+        $privatePem = (string) $private->toString('PKCS8');
+        $publicKey = $private->getPublicKey();
+        $publicPem = (string) $publicKey->toString('PKCS8');
+
+        $kid = $this->base64url(hash('sha256', $publicPem, true));
+
+        $jwkJson = (string) $publicKey->toString('JWK');
+        $jwk = json_decode($jwkJson, true)['keys'][0];
+        $jwk['kid'] = $kid;
+        $jwk['alg'] = 'RS256';
+        $jwk['use'] = 'sig';
+
+        return [
+            'privatePem' => $privatePem,
+            'jwk' => $jwk,
+            'kid' => $kid,
+        ];
+    }
+
+    private function base64url(string $bytes): string
+    {
+        return rtrim(strtr(base64_encode($bytes), '+/', '-_'), '=');
+    }
+
+    private function uuid(): string
+    {
+        $bytes = random_bytes(16);
+        $bytes[6] = chr((ord($bytes[6]) & 0x0F) | 0x40);
+        $bytes[8] = chr((ord($bytes[8]) & 0x3F) | 0x80);
+        $hex = bin2hex($bytes);
+
+        return sprintf(
+            '%s-%s-%s-%s-%s',
+            substr($hex, 0, 8),
+            substr($hex, 8, 4),
+            substr($hex, 12, 4),
+            substr($hex, 16, 4),
+            substr($hex, 20, 12),
+        );
     }
 }
