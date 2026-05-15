@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GrapheneICT\CognitoGuard\Auth;
 
 use Illuminate\Contracts\Auth\Authenticatable;
@@ -8,7 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use stdClass;
 
-class CognitoUserProvider implements UserProvider
+final class CognitoUserProvider implements UserProvider
 {
     /**
      * @param  array<string, mixed>  $config
@@ -94,11 +96,19 @@ class CognitoUserProvider implements UserProvider
         return (new $modelClass)->newQuery();
     }
 
+    /**
+     * @return class-string<Model&Authenticatable>
+     */
     private function modelClass(): string
     {
         $class = $this->config['model'] ?? null;
         if (! is_string($class) || ! class_exists($class)) {
             throw new \RuntimeException('cognito-guard.user_provider.model is not configured to a valid class.');
+        }
+        if (! is_subclass_of($class, Model::class) || ! is_subclass_of($class, Authenticatable::class)) {
+            throw new \RuntimeException(
+                'cognito-guard.user_provider.model must extend '.Model::class.' and implement '.Authenticatable::class.'.',
+            );
         }
 
         return $class;

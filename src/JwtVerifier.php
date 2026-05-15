@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GrapheneICT\CognitoGuard;
 
 use DomainException;
@@ -14,7 +16,7 @@ use stdClass;
 use Throwable;
 use UnexpectedValueException;
 
-class JwtVerifier
+final class JwtVerifier
 {
     private const ALGORITHM = 'RS256';
 

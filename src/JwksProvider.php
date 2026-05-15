@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GrapheneICT\CognitoGuard;
 
 use Firebase\JWT\JWK;
@@ -8,9 +10,10 @@ use GrapheneICT\CognitoGuard\Exceptions\JwksFetchException;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
-class JwksProvider
+final class JwksProvider
 {
     private const STALE_TTL_SECONDS = 2592000;
 
@@ -47,9 +50,19 @@ class JwksProvider
             if ($this->staleFallbackEnabled()) {
                 $stale = $store->get($this->staleKey());
                 if (is_array($stale)) {
+                    $this->log('warning', 'JWKS fetch failed; serving from stale cache.', [
+                        'issuer' => $this->getIssuer(),
+                        'error' => $e->getMessage(),
+                    ]);
+
                     return JWK::parseKeySet($stale);
                 }
             }
+
+            $this->log('error', 'JWKS fetch failed and no stale cache available.', [
+                'issuer' => $this->getIssuer(),
+                'error' => $e->getMessage(),
+            ]);
 
             throw new JwksFetchException(
                 sprintf('Failed to fetch JWKS from %s: %s', $this->getIssuer(), $e->getMessage()),
@@ -100,5 +113,20 @@ class JwksProvider
     private function staleFallbackEnabled(): bool
     {
         return (bool) ($this->jwksConfig['stale_on_error'] ?? true);
+    }
+
+    /**
+     * @param  array<string, mixed>  $context
+     */
+    private function log(string $level, string $message, array $context = []): void
+    {
+        if (! (bool) config('cognito-guard.log.enabled', true)) {
+            return;
+        }
+
+        $channel = config('cognito-guard.log.channel');
+        $logger = is_string($channel) && $channel !== '' ? Log::channel($channel) : Log::driver();
+
+        $logger->log($level, '[cognito-guard] '.$message, $context);
     }
 }

@@ -37,4 +37,13 @@ return [
 
     'bridge_groups_to_gates' => (bool) env('COGNITO_BRIDGE_GROUPS_TO_GATES', true),
 
+    'log' => [
+        // Channel name (from config/logging.php) to write package events to.
+        // null = the app default. Set to a dedicated channel for clean separation.
+        'channel' => env('COGNITO_LOG_CHANNEL'),
+
+        // Master switch. Disable to silence all package-side logging.
+        'enabled' => (bool) env('COGNITO_LOG_ENABLED', true),
+    ],
+
 ];

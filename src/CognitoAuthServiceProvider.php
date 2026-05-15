@@ -1,18 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GrapheneICT\CognitoGuard;
 
 use GrapheneICT\CognitoGuard\Auth\CognitoUserProvider;
+use GrapheneICT\CognitoGuard\Console\TestTokenCommand;
 use GrapheneICT\CognitoGuard\Guards\CognitoGuard;
 use Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Console\AboutCommand;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use RuntimeException;
 
-class CognitoAuthServiceProvider extends ServiceProvider
+final class CognitoAuthServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
@@ -20,6 +23,10 @@ class CognitoAuthServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__.'/../config/cognito-guard.php' => config_path('cognito-guard.php'),
             ], 'cognito-guard-config');
+
+            $this->commands([
+                TestTokenCommand::class,
+            ]);
         }
 
         $this->registerAuth();
@@ -66,7 +73,14 @@ class CognitoAuthServiceProvider extends ServiceProvider
 
             $verifier = new JwtVerifier($jwks, $poolConfig);
 
-            $provider = $app['auth']->createUserProvider($config['provider'] ?? null);
+            $providerName = $config['provider'] ?? null;
+            $provider = $app['auth']->createUserProvider($providerName);
+            if ($provider === null) {
+                throw new RuntimeException(sprintf(
+                    'Auth provider "%s" is not configured. Add it under auth.providers in config/auth.php.',
+                    (string) $providerName,
+                ));
+            }
 
             $dbLess = (bool) ($config['db_less'] ?? false);
 

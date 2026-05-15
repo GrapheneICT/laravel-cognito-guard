@@ -1,7 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GrapheneICT\CognitoGuard\Exceptions;
 
 use RuntimeException;
 
-class JwksFetchException extends RuntimeException {}
+final class JwksFetchException extends RuntimeException {}

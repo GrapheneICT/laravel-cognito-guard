@@ -150,8 +150,77 @@ See [`config/cognito-guard.php`](config/cognito-guard.php). Key knobs:
 ## Diagnostics
 
 ```bash
-php artisan about           # shows Cognito Guard section
+php artisan about                          # shows the Cognito Guard section
+php artisan cognito:test-token <jwt>       # validates a token + prints a step-by-step diagnosis
 ```
+
+The `cognito:test-token` command accepts the raw JWT or a `Bearer <jwt>` string and prints which validation step passed or failed (signature, issuer, `token_use`, `client_id`/`aud`, scopes, expiry). Add `--pool=<name>` to test against a non-default pool, or `--verbose-claims` to dump the full payload.
+
+## FAQ
+
+<details>
+<summary><strong><code>InvalidTokenException: Invalid token_use "id". Allowed: access</code></strong></summary>
+
+Your guard is configured to accept access tokens only, but the client is sending an id token. Either send an access token, or widen `cognito-guard.pools.<name>.allowed_token_use` to `['access', 'id']` (the default).
+</details>
+
+<details>
+<summary><strong><code>InvalidTokenException: Token client_id/aud is not in the allow-list</code></strong></summary>
+
+The token's `client_id` (access tokens) or `aud` (id tokens) doesn't match `COGNITO_CLIENT_IDS`. Either add the App Client ID to that env var (comma-separated), or leave `allowed_client_ids` empty to accept any client.
+</details>
+
+<details>
+<summary><strong><code>InvalidTokenException: Invalid issuer</code></strong></summary>
+
+The token was issued by a different User Pool. Check `COGNITO_USER_POOL_ID` and `AWS_REGION`.
+</details>
+
+<details>
+<summary><strong><code>InvalidTokenException: Token has expired</code></strong></summary>
+
+Either the token genuinely expired, or your server clock has drifted. Bump `cognito-guard.pools.<name>.leeway` (seconds) to tolerate minor skew — but **fix the underlying NTP issue**, don't paper over it long-term.
+</details>
+
+<details>
+<summary><strong><code>JwksFetchException: Failed to fetch JWKS from https://cognito-idp.&lt;region&gt;.amazonaws.com/...</code></strong></summary>
+
+Your app can't reach Cognito's JWKS endpoint. Check egress to `cognito-idp.<region>.amazonaws.com`. The guard will serve from stale cache for up to 30 days if the JWKS was ever fetched successfully (toggle via `cognito-guard.jwks.stale_on_error`).
+</details>
+
+<details>
+<summary><strong>The user returned from <code>auth()->user()</code> isn't my Eloquent model</strong></summary>
+
+If your guard config has `'db_less' => true`, the package returns a `CognitoUser` value object built from JWT claims instead of looking up a database row. Set `db_less => false` (the default) and configure `cognito-guard.user_provider.model` to point at your Eloquent user model.
+</details>
+
+<details>
+<summary><strong><code>Auth provider "..." is not configured</code></strong></summary>
+
+You set `'provider' => 'cognito'` on the guard but didn't add a `cognito` entry under `auth.providers`. Add:
+```php
+'providers' => ['cognito' => ['driver' => 'cognito']],
+```
+</details>
+
+<details>
+<summary><strong>Multiple Cognito pools — how do I authenticate against the second one?</strong></summary>
+
+Register a second guard with a different `pool` key and pick which one to apply per route:
+```php
+'guards' => [
+    'cognito'  => ['driver' => 'cognito', 'provider' => 'cognito', 'pool' => 'default'],
+    'partners' => ['driver' => 'cognito', 'provider' => 'cognito', 'pool' => 'partners'],
+],
+```
+Then `Route::middleware('auth:partners')->...`.
+</details>
+
+<details>
+<summary><strong>I'm migrating from <code>benbjurstrom/cognito-jwt-guard</code></strong></summary>
+
+See [docs/MIGRATING-FROM-BENBJURSTROM.md](docs/MIGRATING-FROM-BENBJURSTROM.md).
+</details>
 
 ## Testing
 

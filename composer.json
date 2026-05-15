@@ -42,6 +42,10 @@
         "pestphp/pest-plugin-laravel": "^3.0",
         "phpseclib/phpseclib": "^3.0"
     },
+    "suggest": {
+        "laravel/octane": "Recommended for high-throughput APIs — this package is Octane-safe and ships with a state-leak test.",
+        "laravel/sanctum": "For hybrid auth setups where some routes use Cognito JWTs and others use Sanctum personal-access-tokens."
+    },
     "autoload": {
         "psr-4": {
             "GrapheneICT\\CognitoGuard\\": "src"
@@ -56,6 +60,7 @@
         "analyse": "vendor/bin/phpstan analyse",
         "test": "vendor/bin/pest",
         "test-coverage": "vendor/bin/pest --coverage",
+        "mutate": "vendor/bin/pest --mutate --covered-only",
         "format": "vendor/bin/pint",
         "format-check": "vendor/bin/pint --test"
     },
