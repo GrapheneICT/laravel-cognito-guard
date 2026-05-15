@@ -2,6 +2,10 @@
 
 All notable changes to `graphene-ict/laravel-cognito-guard` will be documented in this file.
 
+## v2.1.0 - 2026-05-15
+
+**Full Changelog**: https://github.com/GrapheneICT/laravel-cognito-guard/compare/v2.0.0...v2.1.0
+
 ## v2.0.0 - 2026-05-15
 
 ### What's Changed
