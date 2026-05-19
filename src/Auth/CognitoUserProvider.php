@@ -48,8 +48,10 @@ final class CognitoUserProvider implements UserProvider
         $attributes[$this->subColumn()] = $identifier;
 
         $modelClass = $this->modelClass();
+        $instance = new $modelClass;
+        $instance->fill($attributes)->save();
 
-        return $modelClass::create($attributes);
+        return $instance;
     }
 
     public function retrieveByToken($identifier, $token): ?Authenticatable

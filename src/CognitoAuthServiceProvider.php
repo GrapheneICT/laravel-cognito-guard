@@ -6,10 +6,13 @@ namespace GrapheneICT\CognitoGuard;
 
 use GrapheneICT\CognitoGuard\Auth\CognitoUserProvider;
 use GrapheneICT\CognitoGuard\Console\TestTokenCommand;
+use GrapheneICT\CognitoGuard\Console\WarmJwksCommand;
 use GrapheneICT\CognitoGuard\Guards\CognitoGuard;
+use GrapheneICT\CognitoGuard\Http\Middleware\EnsureCognitoScopes;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Console\AboutCommand;
+use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -26,12 +29,20 @@ final class CognitoAuthServiceProvider extends ServiceProvider
 
             $this->commands([
                 TestTokenCommand::class,
+                WarmJwksCommand::class,
             ]);
         }
 
         $this->registerAuth();
         $this->registerGroupsToGatesBridge();
         $this->registerAboutCommand();
+        $this->registerMiddleware();
+    }
+
+    private function registerMiddleware(): void
+    {
+        $router = $this->app->make(Router::class);
+        $router->aliasMiddleware('cognito.scope', EnsureCognitoScopes::class);
     }
 
     public function register(): void

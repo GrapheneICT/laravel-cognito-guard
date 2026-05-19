@@ -102,6 +102,17 @@ $user->claim('sub');      // any single claim
 $user->claims();          // raw payload (stdClass)
 ```
 
+### Per-route scope enforcement
+
+Pool-wide `required_scopes` is a blunt instrument — every route on the guard demands the same scopes. For finer control, use the `cognito.scope` middleware:
+
+```php
+Route::middleware(['auth:cognito', 'cognito.scope:read:reports'])->get('/reports', ...);
+Route::middleware(['auth:cognito', 'cognito.scope:read:reports,write:reports'])->post('/reports', ...);
+```
+
+401 if unauthenticated, 403 if any required scope is missing from the token's `scope` claim.
+
 ### Groups → Gates bridge
 
 With `cognito-guard.bridge_groups_to_gates` enabled (default), entries in the `cognito:groups` claim become Gate abilities for free:
@@ -126,6 +137,11 @@ Route::middleware('can:moderators')->...;     // works the same
     'partners' => ['driver' => 'cognito', 'provider' => 'cognito', 'pool' => 'partners'],
 ],
 ```
+
+## Recipes
+
+- **End-to-end Cognito Hosted UI → SPA → API** (auth code + PKCE, the modern flow): [`docs/COGNITO-SETUP.md`](docs/COGNITO-SETUP.md).
+- **Running Cognito alongside Sanctum**: [`docs/SANCTUM-HYBRID.md`](docs/SANCTUM-HYBRID.md).
 
 ## Configuration reference
 
@@ -154,9 +170,12 @@ Raw tokens are intentionally excluded from event payloads — log claims, not cr
 ```bash
 php artisan about                          # shows the Cognito Guard section
 php artisan cognito:test-token <jwt>       # validates a token + prints a step-by-step diagnosis
+php artisan cognito:warm-jwks              # pre-fetch JWKS at deploy time
 ```
 
 The `cognito:test-token` command accepts the raw JWT or a `Bearer <jwt>` string and prints which validation step passed or failed (signature, issuer, `token_use`, `client_id`/`aud`, scopes, expiry). Add `--pool=<name>` to test against a non-default pool, or `--verbose-claims` to dump the full payload.
+
+`cognito:warm-jwks` pre-fetches and caches the JWKS for every configured pool so the first authenticated request after a cold cache doesn't pay the round-trip, and so reachability to `cognito-idp.<region>.amazonaws.com` is verified at deploy time. Use `--pool=<name>` to warm a single pool.
 
 ## FAQ
 

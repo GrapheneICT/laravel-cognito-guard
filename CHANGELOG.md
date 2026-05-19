@@ -2,6 +2,25 @@
 
 All notable changes to `graphene-ict/laravel-cognito-guard` will be documented in this file.
 
+## v2.2.0 — 2026-05-19
+
+### Added
+
+- `actingAs($userOrClaims, $claims = [])` on the guard — fake a Cognito user in tests without forging JWTs. Works for both DB-less (pass a claims array) and DB-backed (pass an Eloquent user + claims). Sets `lastPayload` too, so the groups → Gates bridge keeps working in tests.
+- `user_provider.sub_claim` config knob — choose which JWT claim supplies the stable identifier. Defaults to `sub`; set to `cognito:username` or a custom attribute when a legacy users table is keyed by something other than the Cognito sub.
+- `CognitoTokenValidated` and `CognitoTokenRejected` events dispatched from the guard for observability (audit logs, alerting, last-seen updates). Carries the user/claims/pool or exception/pool — raw JWTs are intentionally excluded.
+- `cognito.scope:read,write` per-route middleware — fine-grained scope enforcement, complementing the pool-wide `required_scopes` config. 401 if unauthenticated, 403 if any required scope is missing.
+- `php artisan cognito:warm-jwks` — pre-fetches and caches JWKS for every configured pool (or `--pool=<name>`) so the first authenticated request after a cold cache doesn't pay the round-trip, and so JWKS reachability is verified at deploy time.
+- New recipe: end-to-end Hosted UI → SPA → API walkthrough using authorization code + PKCE, plus common gotchas (`docs/COGNITO-SETUP.md`).
+- New recipe: running Cognito + Sanctum side by side (`docs/SANCTUM-HYBRID.md`).
+
+### Changed
+
+- `docs/COGNITO-SETUP.md` Hosted UI section rewritten around authorization code + PKCE; the implicit-flow sketch is gone.
+- `CognitoGuard` constructor extended with a `string $pool = 'default'` argument so events can identify which pool authenticated the request. Backward-compatible default; the service provider sets it automatically.
+
+**Full Changelog**: https://github.com/GrapheneICT/laravel-cognito-guard/compare/v2.1.0...v2.2.0
+
 ## v2.1.0 — 2026-05-15
 
 ### Added
