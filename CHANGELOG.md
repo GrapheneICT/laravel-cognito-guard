@@ -2,31 +2,25 @@
 
 All notable changes to `graphene-ict/laravel-cognito-guard` will be documented in this file.
 
-## v2.1.0 - 2026-05-15
+## v2.1.0 — 2026-05-15
+
+### Added
+
+- `php artisan cognito:test-token <jwt>` diagnostic command — validates a token and prints a step-by-step diagnosis (signature, issuer, `token_use`, `client_id`/`aud`, scopes, expiry). Supports `--pool=<name>` and `--verbose-claims`.
+- Octane-safety regression test covering guard state isolation between requests.
+
+### Changed
+
+- Upgraded to PHPStan 8 / Larastan 3; tightened analysis to level max.
+- Expanded README with FAQ section, configuration reference, and diagnostics docs.
+- Added CONTRIBUTING and SECURITY docs.
+- Pint runs in check-only mode on CI (removed auto-fix workflow).
 
 **Full Changelog**: https://github.com/GrapheneICT/laravel-cognito-guard/compare/v2.0.0...v2.1.0
 
-## v2.0.0 - 2026-05-15
+## v2.0.0 — 2026-05-15
 
-### What's Changed
-
-* Bump dependabot/fetch-metadata from 1.3.3 to 1.3.4 by @dependabot[bot] in https://github.com/GrapheneICT/laravel-cognito-guard/pull/13
-* Bump dependabot/fetch-metadata from 1.3.4 to 1.3.5 by @dependabot[bot] in https://github.com/GrapheneICT/laravel-cognito-guard/pull/14
-* Bump dependabot/fetch-metadata from 1.3.5 to 1.3.6 by @dependabot[bot] in https://github.com/GrapheneICT/laravel-cognito-guard/pull/17
-* Bump dependabot/fetch-metadata from 1.3.6 to 1.4.0 by @dependabot[bot] in https://github.com/GrapheneICT/laravel-cognito-guard/pull/19
-* Bump dependabot/fetch-metadata from 1.4.0 to 1.5.1 by @dependabot[bot] in https://github.com/GrapheneICT/laravel-cognito-guard/pull/21
-* Bump dependabot/fetch-metadata from 1.5.1 to 1.6.0 by @dependabot[bot] in https://github.com/GrapheneICT/laravel-cognito-guard/pull/22
-* v2.0.0 revival: lean Cognito JWT guard, multi-pool, groups into Gates… by @jstojiljkovic in https://github.com/GrapheneICT/laravel-cognito-guard/pull/25
-
-### New Contributors
-
-* @dependabot[bot] made their first contribution in https://github.com/GrapheneICT/laravel-cognito-guard/pull/13
-
-**Full Changelog**: https://github.com/GrapheneICT/laravel-cognito-guard/compare/v1.0.0...v2.0.0
-
-## 2.0.0 — Unreleased
-
-This is a clean break from v1. See [UPGRADING.md](UPGRADING.md) for the migration guide.
+Clean break from v1. See [UPGRADING.md](UPGRADING.md) for the migration guide.
 
 ### Added
 
@@ -63,7 +57,9 @@ This is a clean break from v1. See [UPGRADING.md](UPGRADING.md) for the migratio
 ### Requirements
 
 - PHP `^8.3`
-- Laravel `^11.0 | ^12.0 | ^13.0`
+- Laravel `^11.0 | ^12.0`
+
+**Full Changelog**: https://github.com/GrapheneICT/laravel-cognito-guard/compare/v1.0.0...v2.0.0
 
 ## 1.0.0 — 2022-09-25
 

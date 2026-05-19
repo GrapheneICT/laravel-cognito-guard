@@ -90,6 +90,30 @@ class CognitoGuard implements Guard
     }
 
     /**
+     * Authenticate the guard as a fake user, bypassing JWT verification.
+     *
+     * Intended for use in test suites of consuming applications, so callers
+     * do not have to forge JWTs to exercise routes protected by `auth:cognito`.
+     *
+     * @param  Authenticatable|array<string, mixed>  $userOrClaims  An Eloquent user, a CognitoUser, or an array of JWT claims.
+     * @param  array<string, mixed>  $claims  When the first argument is an Authenticatable, the JWT claims to attach (so the groups→Gates bridge works).
+     */
+    public function actingAs(Authenticatable|array $userOrClaims, array $claims = []): Authenticatable
+    {
+        if (is_array($userOrClaims)) {
+            $claims = $userOrClaims;
+            $user = CognitoUser::fromClaims((object) $claims);
+        } else {
+            $user = $userOrClaims;
+        }
+
+        $this->lastPayload = (object) $claims;
+        $this->setUser($user);
+
+        return $user;
+    }
+
+    /**
      * @param  array<string, mixed>  $context
      */
     private function log(string $level, string $message, array $context = []): void

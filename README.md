@@ -207,7 +207,28 @@ Register a second guard with a different `pool` key and pick which one to apply 
 Then `Route::middleware('auth:partners')->...`.
 </details>
 
-## Testing
+## Testing your app
+
+The guard exposes an `actingAs()` helper so your test suite doesn't need to forge JWTs:
+
+```php
+use Illuminate\Support\Facades\Auth;
+
+// DB-less: pass JWT claims, get a CognitoUser back.
+Auth::guard('cognito')->actingAs([
+    'sub' => 'user-uuid',
+    'email' => 'alice@example.com',
+    'cognito:groups' => ['admins'],
+]);
+
+// DB-backed: pass your Eloquent user + the claims you want attached
+// (so the groups → Gates bridge sees them).
+Auth::guard('cognito')->actingAs($user, ['cognito:groups' => ['editors']]);
+```
+
+After the call, `auth()->user()`, `auth()->id()`, `Gate::allows('admins')`, and routes behind `auth:cognito` all behave as if a real token had been verified.
+
+## Testing the package
 
 ```bash
 composer install
