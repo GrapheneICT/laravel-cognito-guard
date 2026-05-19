@@ -28,7 +28,15 @@ return [
     'user_provider' => [
         'auto_provision' => (bool) env('COGNITO_AUTO_PROVISION', true),
         'model' => env('COGNITO_USER_MODEL', 'App\\Models\\User'),
+
+        // Which JWT claim supplies the stable identifier. Default `sub` works for
+        // almost everyone. Override when a legacy users table is keyed by
+        // `cognito:username` or a custom attribute instead of the Cognito sub.
+        'sub_claim' => env('COGNITO_SUB_CLAIM', 'sub'),
+
+        // Which column on the user model stores the identifier value above.
         'sub_column' => 'provider_id',
+
         'attribute_map' => [
             'email' => 'email',
             'cognito:username' => 'name',

@@ -96,11 +96,98 @@ Tokens minted for those users will include `"cognito:groups": ["admins", ...]`. 
 
 This guard only **verifies** tokens; your client app is responsible for **obtaining** them. The two common patterns:
 
-### SPA with Hosted UI
+### SPA with Hosted UI (authorization code + PKCE) — end-to-end recipe
 
-1. Redirect the user to `https://<your-pool-domain>/login?...client_id=...&response_type=token&scope=openid+email&redirect_uri=...`.
-2. Cognito redirects back with `#access_token=...&id_token=...` in the URL fragment.
-3. Your SPA stores the access token and sends it as `Authorization: Bearer <jwt>` on API calls to your Laravel app.
+The full, recommended flow for a browser SPA talking to a Laravel API behind this guard. **Use `authorization_code` with PKCE, not the legacy implicit (`response_type=token`) flow.**
+
+**1. Cognito-side setup**
+
+In your App Client → **App integration**:
+
+- **Hosted UI** → assign a domain (e.g. `auth.example.com` or `<prefix>.auth.<region>.amazoncognito.com`).
+- **Allowed callback URLs:** `https://app.example.com/auth/callback` (the SPA route that exchanges the code).
+- **Allowed sign-out URLs:** `https://app.example.com/`.
+- **OAuth grant types:** check **Authorization code grant**. Leave Implicit grant unchecked.
+- **OAuth scopes:** at minimum `openid`, plus `email` / `profile` if you need them, plus any custom resource-server scopes.
+
+**2. SPA — start the login**
+
+When the user clicks "Sign in":
+
+```js
+// Generate PKCE verifier + challenge
+const verifier = base64url(crypto.getRandomValues(new Uint8Array(32)))
+const challenge = base64url(
+  new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier)))
+)
+sessionStorage.setItem('pkce_verifier', verifier)
+
+const params = new URLSearchParams({
+  client_id: 'YOUR_APP_CLIENT_ID',
+  response_type: 'code',
+  scope: 'openid email',
+  redirect_uri: 'https://app.example.com/auth/callback',
+  code_challenge: challenge,
+  code_challenge_method: 'S256',
+})
+
+window.location.assign(`https://YOUR_DOMAIN/oauth2/authorize?${params}`)
+```
+
+**3. SPA — handle the callback and exchange the code**
+
+At `/auth/callback`:
+
+```js
+const code = new URL(window.location.href).searchParams.get('code')
+const verifier = sessionStorage.getItem('pkce_verifier')
+
+const res = await fetch('https://YOUR_DOMAIN/oauth2/token', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+  body: new URLSearchParams({
+    grant_type: 'authorization_code',
+    client_id: 'YOUR_APP_CLIENT_ID',
+    code,
+    redirect_uri: 'https://app.example.com/auth/callback',
+    code_verifier: verifier,
+  }),
+})
+
+const { access_token, id_token, refresh_token, expires_in } = await res.json()
+// Store access_token in memory (preferred) or sessionStorage.
+// Store refresh_token only if you must — and never in localStorage in plain form.
+```
+
+**4. SPA — call the Laravel API**
+
+```js
+await fetch('https://api.example.com/me', {
+  headers: { Authorization: `Bearer ${access_token}` },
+})
+```
+
+**5. Laravel — validate**
+
+The route is just:
+
+```php
+Route::middleware('auth:cognito')->get('/me', fn () => auth()->user());
+```
+
+This package handles everything else: signature against JWKS, issuer, `token_use`, `client_id` allow-list, scopes, expiry. If the token is bad, Laravel returns 401.
+
+**6. Refresh**
+
+When `access_token` is near expiry (use `expires_in` to schedule), POST to `/oauth2/token` again with `grant_type=refresh_token` and the stored refresh token. The Laravel side stays untouched.
+
+**Common gotchas**
+
+- **`redirect_uri` mismatch.** Must be byte-for-byte identical between the `/authorize` call, `/token` call, and the App Client's allowed callback list. Trailing slash counts.
+- **Mixed token types.** If your SPA accidentally sends the `id_token` instead of the `access_token`, the guard accepts both by default — but `client_id` vs `aud` allow-list semantics differ. Restrict via `cognito-guard.pools.<name>.allowed_token_use` to lock this down.
+- **CORS on `/oauth2/token`.** Cognito's token endpoint accepts cross-origin POSTs from your SPA without preflight as long as you stick to `Content-Type: application/x-www-form-urlencoded` (a CORS-safelisted header). If you switch to JSON, you'll trigger preflight and need an OPTIONS handler Cognito doesn't provide.
+- **Refresh-token rotation isn't on by default.** Enable it in the App Client if you store refresh tokens client-side.
+- **`scope` claim is missing from id tokens.** If you've set `required_scopes` and configured `allowed_token_use: ['id']`, every request will 401. Either widen `allowed_token_use` to `['access']` or drop `required_scopes`.
 
 ### Direct SRP (no Hosted UI)
 

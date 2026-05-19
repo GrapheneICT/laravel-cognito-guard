@@ -137,6 +137,17 @@ See [`config/cognito-guard.php`](config/cognito-guard.php). Key knobs:
 - `pools.<name>.leeway` — clock-skew tolerance for `exp`/`nbf`/`iat`, in seconds.
 - `jwks.cache_ttl` — JWKS cache TTL (default 6h). Stale entries kept 30d and used on Cognito outages.
 - `bridge_groups_to_gates` — toggle the `cognito:groups` → Gate bridge.
+- `user_provider.sub_claim` — which JWT claim supplies the stable identifier. Default `sub`. Set to `cognito:username` or a custom attribute when a legacy users table is keyed by something other than the Cognito sub.
+- `user_provider.sub_column` — the column on the user model that stores the value above (default `provider_id`).
+
+## Events
+
+The guard dispatches two events for observability — listen for them however you wire listeners normally (e.g. in `AppServiceProvider::boot()`):
+
+- `GrapheneICT\CognitoGuard\Events\CognitoTokenValidated` — fired after a JWT is verified **and** a user is resolved. Carries `$user`, `$claims` (stdClass), and `$pool`.
+- `GrapheneICT\CognitoGuard\Events\CognitoTokenRejected` — fired when a token fails verification, just before the `InvalidTokenException` propagates. Carries `$exception` and `$pool`.
+
+Raw tokens are intentionally excluded from event payloads — log claims, not credentials.
 
 ## Diagnostics
 

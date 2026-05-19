@@ -6,6 +6,8 @@ namespace GrapheneICT\CognitoGuard\Guards;
 
 use GrapheneICT\CognitoGuard\Auth\CognitoUserProvider;
 use GrapheneICT\CognitoGuard\CognitoUser;
+use GrapheneICT\CognitoGuard\Events\CognitoTokenRejected;
+use GrapheneICT\CognitoGuard\Events\CognitoTokenValidated;
 use GrapheneICT\CognitoGuard\Exceptions\InvalidTokenException;
 use GrapheneICT\CognitoGuard\JwtVerifier;
 use Illuminate\Auth\GuardHelpers;
@@ -27,6 +29,7 @@ class CognitoGuard implements Guard
         private Request $request,
         private readonly JwtVerifier $verifier,
         private readonly bool $dbLessByDefault = false,
+        private readonly string $pool = 'default',
     ) {
         $this->provider = $provider;
     }
@@ -46,6 +49,7 @@ class CognitoGuard implements Guard
             $payload = $this->verifier->verify($token);
         } catch (InvalidTokenException $e) {
             $this->log('warning', 'Token rejected: '.$e->getMessage());
+            event(new CognitoTokenRejected($e, $this->pool));
 
             throw $e;
         }
@@ -62,6 +66,10 @@ class CognitoGuard implements Guard
 
         if ($resolved === null && $this->dbLessByDefault) {
             $resolved = CognitoUser::fromClaims($payload);
+        }
+
+        if ($resolved !== null) {
+            event(new CognitoTokenValidated($resolved, $payload, $this->pool));
         }
 
         return $this->user = $resolved;

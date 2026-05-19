@@ -30,12 +30,12 @@ final class CognitoUserProvider implements UserProvider
 
     public function resolveFromClaims(stdClass $claims): ?Authenticatable
     {
-        $sub = (string) ($claims->sub ?? '');
-        if ($sub === '') {
+        $identifier = (string) ($claims->{$this->subClaim()} ?? '');
+        if ($identifier === '') {
             return null;
         }
 
-        $user = $this->retrieveById($sub);
+        $user = $this->retrieveById($identifier);
         if ($user !== null) {
             return $user;
         }
@@ -45,7 +45,7 @@ final class CognitoUserProvider implements UserProvider
         }
 
         $attributes = $this->mapAttributes($claims);
-        $attributes[$this->subColumn()] = $sub;
+        $attributes[$this->subColumn()] = $identifier;
 
         $modelClass = $this->modelClass();
 
@@ -117,6 +117,13 @@ final class CognitoUserProvider implements UserProvider
     private function subColumn(): string
     {
         return (string) ($this->config['sub_column'] ?? 'provider_id');
+    }
+
+    private function subClaim(): string
+    {
+        $claim = (string) ($this->config['sub_claim'] ?? 'sub');
+
+        return $claim === '' ? 'sub' : $claim;
     }
 
     private function autoProvision(): bool

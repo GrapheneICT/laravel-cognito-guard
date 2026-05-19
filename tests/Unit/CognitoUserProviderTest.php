@@ -61,6 +61,29 @@ it('treats no-op auth methods as inert', function () {
     expect(true)->toBeTrue();
 });
 
+it('uses a custom sub_claim when configured', function () {
+    $provider = makeProvider(['sub_claim' => 'cognito:username']);
+
+    $user = $provider->resolveFromClaims((object) [
+        'sub' => 'real-sub-ignored',
+        'cognito:username' => 'legacy-id-42',
+        'email' => 'legacy@example.com',
+    ]);
+
+    expect($user)->toBeInstanceOf(Authenticatable::class)
+        ->and(User::where('provider_id', 'legacy-id-42')->exists())->toBeTrue()
+        ->and(User::where('provider_id', 'real-sub-ignored')->exists())->toBeFalse();
+});
+
+it('falls back to sub when sub_claim is empty string', function () {
+    $provider = makeProvider(['sub_claim' => '']);
+
+    $user = $provider->resolveFromClaims((object) ['sub' => 'fallback-sub']);
+
+    expect($user)->toBeInstanceOf(Authenticatable::class)
+        ->and(User::where('provider_id', 'fallback-sub')->exists())->toBeTrue();
+});
+
 it('maps configured claims onto provisioned user attributes', function () {
     $provider = makeProvider();
 

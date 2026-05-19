@@ -84,7 +84,7 @@ final class CognitoAuthServiceProvider extends ServiceProvider
 
             $dbLess = (bool) ($config['db_less'] ?? false);
 
-            return new CognitoGuard($provider, $app['request'], $verifier, $dbLess);
+            return new CognitoGuard($provider, $app['request'], $verifier, $dbLess, $poolName);
         });
     }
 
